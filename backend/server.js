@@ -6,7 +6,6 @@ const rateLimit = require('express-rate-limit');
 const path      = require('path');
 const fs        = require('fs');
 require('dotenv').config();
-const path = require('path');
 
 const app = express();
 
@@ -33,6 +32,8 @@ const allowedOrigins = [
 app.use(cors({
   origin: (origin, cb) => {
     if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    // Allow any netlify.app subdomain
+    if (/^https:\/\/[^.]+\.netlify\.app$/.test(origin)) return cb(null, true);
     if (process.env.NODE_ENV !== 'production' && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) return cb(null, true);
     cb(new Error(`CORS: origin ${origin} not allowed`));
   },
@@ -77,7 +78,7 @@ app.use('/api/resources',             require('./routes/resources'));
 app.use('/api/files',                 require('./routes/files'));
 app.use('/api/admin',                 require('./routes/admin'));
 
-// ── Health (includes DB status so frontend can show a message if DB is down) ─────
+// ── Health ────────────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   const dbState = mongoose.connection.readyState;
   const dbStatus = dbState === 1 ? 'connected' : 'disconnected';
@@ -88,6 +89,7 @@ app.get('/api/health', (req, res) => {
     db: dbStatus,
   });
 });
+
 // ── Home Route ────────────────────────────────────────────────────────────────
 app.get('/', (req, res) => {
   res.send('🚀 Skillbrzee API is running');
@@ -104,7 +106,7 @@ app.use((err, req, res, next) => {
   res.status(status).json({ error: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message });
 });
 
-// ── Boot: start HTTP server first, then connect DB (so server runs even without DB) ─
+// ── Boot ──────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
 const { connect } = require('./config/database');
 
@@ -123,21 +125,3 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
-const path = require('path');
-
-// Add this AFTER your API routes
-app.use(express.static(path.join(__dirname, '../frontend')));
-
-// Catch-all route for SPA (if applicable)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/index.html'));
-});
-const cors = require('cors');
-app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:5000',
-    'https://your-site.netlify.app'  // ← add your Netlify URL
-  ],
-  credentials: true
-}));
