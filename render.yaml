@@ -1,0 +1,17 @@
+# Render Blueprint — Backend deployment
+# Dashboard: https://dashboard.render.com
+#
+# Option A: Set Root Directory to "backend" in Render project settings
+#   → Build: npm install  |  Start: npm start
+#
+# Option B: Deploy from repo root (use the config below)
+
+services:
+  - type: web
+    name: skillbree-backend
+    runtime: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production

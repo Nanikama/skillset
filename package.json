@@ -1,0 +1,18 @@
+{
+  "name": "skillbree-project",
+  "version": "1.0.0",
+  "description": "Skillbree full-stack: frontend + backend",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && cd backend && npm install",
+    "start": "cd backend && npm start",
+    "dev": "cd backend && npm run dev:all",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npx --yes serve -l 3000",
+    "backend": "cd backend && npm start",
+    "seed-admin": "cd backend && npm run seed-admin"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
