@@ -131,3 +131,12 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
+const cors = require('cors');
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5000',
+    'https://your-site.netlify.app'  // ← add your Netlify URL
+  ],
+  credentials: true
+}));
