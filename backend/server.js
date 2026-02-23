@@ -122,3 +122,12 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+const path = require('path');
+
+// Add this AFTER your API routes
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+// Catch-all route for SPA (if applicable)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
