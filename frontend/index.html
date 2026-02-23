@@ -488,7 +488,7 @@
   };
 
   // Production backend URL — update when deploying to your own Render service
-  const PRODUCTION_API_BASE = 'https://skillbrzee-backend.onrender.com/api';
+  const PRODUCTION_API_BASE = 'https://skillset-g4oh.onrender.com/api';
   // Backend API URL — localhost:5000 or 5002 per backend .env PORT; override via localStorage 'sb_api_base'
   const API_BASE = (() => {
     const forced = localStorage.getItem('sb_api_base');
@@ -840,7 +840,7 @@
             </li>
             <li>
               <div class="icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
-              <span>support@skillbrzee.in</span>
+              <span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a1d2d4d1d1ced3d5e1d2cac8cdcdc3d3dbc4c48fc8cf">[email&#160;protected]</a></span>
             </li>
             <li>
               <div class="icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
@@ -932,7 +932,7 @@
         </button>
       </div>
       <p style="text-align:center;color:var(--text2);font-size:.76rem;margin-top:16px;">
-        Default: admin@skillbrzee.in / Admin@Skillbrzee123
+        Default: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7617121b1f1836051d1f1a1a14040c1313581f18">[email&#160;protected]</a> / Admin@Skillbrzee123
       </p>
     </div>
   </div>
@@ -1062,7 +1062,7 @@
           <div class="admin-card">
             <h3>🔐 Admin Credentials</h3>
             <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:16px;font-family:monospace;font-size:.85rem;">
-              <div style="color:var(--text2);margin-bottom:6px;">Email: <span style="color:var(--orange);">admin@skillbrzee.in</span></div>
+              <div style="color:var(--text2);margin-bottom:6px;">Email: <span style="color:var(--orange);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3253565f5b5c7241595b5e5e50404857571c5b5c">[email&#160;protected]</a></span></div>
               <div style="color:var(--text2);">Password: <span style="color:var(--orange);">Admin@Skillbrzee123</span></div>
             </div>
             <p style="color:var(--text2);font-size:.78rem;margin-top:10px;">⚠️ Change this password after first login (update in source code line ~45)</p>
@@ -1259,7 +1259,7 @@
 
   <div class="toast-container" id="toastContainer"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 /* ═══════════════════════════════════════════════════════════
    DATA
 ═══════════════════════════════════════════════════════════ */
@@ -2181,8 +2181,8 @@ document.getElementById('backToTop').addEventListener('click',scrollToTop);
 
 /* ═══════════════════════════════════════════════════════════
    INIT
-═══════════════════════════════════════════════════════════ */
-document.addEventListener('DOMContentLoaded',async()=>{
+════════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', async () => {
   await refreshUser();
   renderCourses();
   renderPackages();
