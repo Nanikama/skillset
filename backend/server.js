@@ -14,6 +14,8 @@ app.use(helmet());
 
 const allowedOrigins = [
   process.env.FRONTEND_URL,
+  'https://skillset-1.onrender.com',       // ← Render frontend (static site)
+  'https://skillset-g4oh.onrender.com',    // ← Render backend itself
   'http://localhost:3000',
   'http://localhost:5000',
   'http://localhost:5002',
@@ -26,14 +28,14 @@ const allowedOrigins = [
   'http://127.0.0.1:5500',
   'http://127.0.0.1:8080',
   'http://127.0.0.1:5173',
-  'null', // file:// protocol
+  'null',
 ].filter(Boolean);
 
 app.use(cors({
   origin: (origin, cb) => {
     if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-    // Allow any netlify.app subdomain
     if (/^https:\/\/[^.]+\.netlify\.app$/.test(origin)) return cb(null, true);
+    if (/^https:\/\/[^.]+\.onrender\.com$/.test(origin)) return cb(null, true);
     if (process.env.NODE_ENV !== 'production' && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) return cb(null, true);
     cb(new Error(`CORS: origin ${origin} not allowed`));
   },
