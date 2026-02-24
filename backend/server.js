@@ -122,7 +122,7 @@ app.listen(PORT, () => {
     })
     .catch(err => {
       console.warn('⚠️  MongoDB not available:', err.message);
-      console.warn('   Start MongoDB or set MONGO_URI. API will return 503 for auth/courses/resources until connected.');
+      console.warn('   Start MongoDB or set MONGO_URL. API will return 503 for auth/courses/resources until connected.');
     });
 });
 
