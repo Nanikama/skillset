@@ -2182,3 +2182,19 @@ document.getElementById('backToTop').addEventListener('click',scrollToTop);
 /* ═══════════════════════════════════════════════════════════
    INIT
 ═
+════════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', async () => {
+  await refreshUser();
+  renderCourses();
+  renderPackages();
+  renderTestimonials();
+  await renderPublicResources();
+  buildDots();
+  startSlider();
+  observeReveal();
+  initCursorTargets();
+  updateNavAuth();
+});
+</script>
+</body>
+</html>
