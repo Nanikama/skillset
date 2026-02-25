@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Skillbrzee | India's Trusted Learning Platform</title>
@@ -487,7 +488,7 @@
   };
 
   // Production backend URL — update when deploying to your own Render service
-  const PRODUCTION_API_BASE = 'https://skillbrzee-backend.onrender.com/api';
+  const PRODUCTION_API_BASE = 'http://localhost:5002/api';
   // Backend API URL — localhost:5000 or 5002 per backend .env PORT; override via localStorage 'sb_api_base'
   const API_BASE = (() => {
     const forced = localStorage.getItem('sb_api_base');
@@ -885,34 +886,6 @@
   </div>
 
   <!-- ══════════════════════════════════════════════
-       SIMPLE UPI QR PAYMENT MODAL
-  ══════════════════════════════════════════════ -->
-  <div class="modal-overlay" id="qrModal">
-    <div class="modal" style="max-width:460px;text-align:center;">
-      <button class="modal-close" onclick="closeModal('qrModal')" aria-label="Close">
-        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-      <p class="section-tag" style="margin-bottom:8px;">UPI PAYMENT</p>
-      <h3 style="margin-bottom:8px;">Scan &amp; Pay</h3>
-      <p style="font-size:.9rem;color:var(--text2);margin-bottom:8px;">
-        Scan this UPI QR with your UPI app and complete the payment.
-      </p>
-      <p style="font-size:1.1rem;font-weight:600;color:var(--orange);margin-bottom:12px;" id="qrModalAmount">₹500</p>
-      <p style="font-size:.85rem;color:var(--text2);margin-bottom:12px;" id="qrModalPkgName">Package</p>
-      <div style="display:flex;justify-content:center;align-items:center;margin-bottom:18px;min-height:220px;">
-        <img id="upiQrImage" src="upi-qr.png" alt="UPI QR Code" style="width:220px;height:220px;border-radius:16px;border:1px solid var(--border2);background:#111;object-fit:contain;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
-        <div id="qrPlaceholder" style="display:none;width:220px;height:220px;border-radius:16px;border:1px dashed var(--border2);background:var(--bg3);color:var(--text2);font-size:.85rem;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px;">Add <strong>upi-qr.png</strong> to this folder</div>
-      </div>
-      <p style="font-size:.85rem;color:var(--text2);margin-bottom:18px;">
-        After paying, click the button below to confirm. Your access will be unlocked.
-      </p>
-      <button class="btn btn-primary" style="width:100%;justify-content:center;" id="qrConfirmBtn" onclick="confirmManualPayment()">
-        I Have Paid
-      </button>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════════
        USER LOGIN MODAL
   ══════════════════════════════════════════════ -->
   <div class="modal-overlay" id="loginModal">
@@ -1018,9 +991,6 @@
         <div class="admin-nav-item" onclick="switchAdminSection('users',this)">
           <span class="nav-icon">👥</span> Users
         </div>
-        <div class="admin-nav-item" onclick="switchAdminSection('enrollments',this)">
-          <span class="nav-icon">🎓</span> Enrollments
-        </div>
         <div class="admin-nav-item" onclick="switchAdminSection('packages',this)">
           <span class="nav-icon">📦</span> Packages
         </div>
@@ -1086,9 +1056,6 @@
               </button>
               <button class="btn btn-ghost" onclick="switchAdminSection('users', document.querySelector('.admin-nav-item:nth-child(4)'))">
                 👥 Manage Users
-              </button>
-              <button class="btn btn-ghost" onclick="switchAdminSection('enrollments', document.querySelector('.admin-nav-item:nth-child(5)'))">
-                🎓 View Enrollments
               </button>
             </div>
           </div>
@@ -1261,31 +1228,6 @@
                 </div>
               </div>
               <button class="btn btn-primary" style="margin-top:14px;" onclick="addDemoUser()">Add User</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- ENROLLMENTS SECTION -->
-        <div class="admin-section" id="admin-enrollments">
-          <div class="admin-card">
-            <h3>🎓 Enrollments — Who enrolled in which course</h3>
-            <p style="color:var(--text2);font-size:.85rem;margin-bottom:16px;">All paid enrollments from the database. User + Course/Package + Date.</p>
-            <div class="table-wrap">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>User</th>
-                    <th>Email</th>
-                    <th>Course / Package</th>
-                    <th>Amount</th>
-                    <th>Date</th>
-                  </tr>
-                </thead>
-                <tbody id="adminEnrollmentsBody">
-                  <tr><td colspan="6" class="table-empty">Loading…</td></tr>
-                </tbody>
-              </table>
             </div>
           </div>
         </div>
@@ -1733,48 +1675,32 @@ async function submitEnroll() {
       } else if(regRes.ok){saveAuth(regData.accessToken,regData.user);token=regData.accessToken;}
       else{showToast('error','Registration Failed',regData.error||'Please try again.');setLoading('enrollBtn',false);return;}
     }
-    // At this point the user is registered/logged-in.
-    // For simple UPI QR flow, just open the QR modal (no payment gateway).
-    setLoading('enrollBtn',false);
-    closeModal('enrollModal');
-    const pkgForQr = PACKAGES.find(p=>p.id===currentPkgId);
-    if(pkgForQr){
-      const amtEl=document.getElementById('qrModalAmount'); if(amtEl) amtEl.textContent=pkgForQr.price;
-      const pkgEl=document.getElementById('qrModalPkgName'); if(pkgEl) pkgEl.textContent=pkgForQr.name;
-    }
-    openModal('qrModal');
-  }catch(err){console.error('[enrollFlow]',err);showToast('error','Something went wrong','Please check your connection and try again.');setLoading('enrollBtn',false);}
-}
-
-// Called after user clicks "I Have Paid" on the QR modal.
-async function confirmManualPayment(){
-  if(!isLoggedIn()){showToast('error','Login Required','Please log in before confirming payment.');openModal('loginModal');return;}
-  if(!currentPkgId){showToast('error','No Package Selected','Please choose a package first.');return;}
-  setLoading('qrConfirmBtn',true,'Confirming…');
-  try{
-    const res=await fetch(`${API_BASE}/payments/manual-confirm`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':`Bearer ${authToken}`},
-      body:JSON.stringify({packageId:currentPkgId})
-    });
-    const data=await res.json();
-    if(!res.ok){
-      showToast('error','Enrollment Failed',data.error||'Could not confirm enrollment.');
-      setLoading('qrConfirmBtn',false);
+    const orderRes=await fetch(`${API_BASE}/payments/create-order`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({packageId:currentPkgId})});
+    const orderData=await orderRes.json();
+    if(!orderRes.ok){showToast('error','Order Error',orderData.error||'Could not create order.');setLoading('enrollBtn',false);return;}
+    setLoading('enrollBtn',false);closeModal('enrollModal');
+    if(orderData.mock){
+      try{
+        const devRes=await fetch(`${API_BASE}/payments/dev-confirm`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({paymentId:orderData.paymentId})});
+        const devData=await devRes.json();
+        if(devRes.ok){await refreshUser();updateNavAuth();showToast('success','🎓 Enrolled!',`${orderData.packageName} — (dev payment confirmed)`);}
+        else showToast('error','Dev Payment Failed',devData.error||'Could not confirm payment.');
+      }catch{showToast('error','Network Error','Could not confirm dev payment.');}
       return;
     }
-    await refreshUser();
-    updateNavAuth();
-    closeModal('qrModal');
-    showToast('success','🎓 Enrolled!','Your course access has been unlocked.');
-    scrollToSection('courses');
-    setTimeout(()=>scrollToSection('resources'),400);
-  }catch(err){
-    console.error('[confirmManualPayment]',err);
-    showToast('error','Network Error','Could not reach server. Please try again.');
-  }finally{
-    setLoading('qrConfirmBtn',false);
-  }
+    const rzp=new Razorpay({key:orderData.keyId,amount:orderData.amount,currency:'INR',name:'Skillbrzee',description:orderData.packageName,order_id:orderData.orderId,prefill:orderData.prefill,theme:{color:'#f97316'},
+      handler:async(response)=>{
+        try{
+          const verRes=await fetch(`${API_BASE}/payments/verify`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({razorpay_order_id:response.razorpay_order_id,razorpay_payment_id:response.razorpay_payment_id,razorpay_signature:response.razorpay_signature,paymentId:orderData.paymentId})});
+          const verData=await verRes.json();
+          if(verRes.ok){await refreshUser();updateNavAuth();showToast('success','🎓 Enrolled!',`${orderData.packageName} — Check your email!`);}
+          else showToast('error','Verification Failed',verData.error||'Contact support.');
+        }catch{showToast('error','Network Error','Could not verify payment. Contact support@skillbrzee.in');}
+      },
+      modal:{ondismiss:()=>showToast('info','Payment Cancelled','You can try again anytime.')}
+    });
+    rzp.open();
+  }catch(err){console.error('[enrollFlow]',err);showToast('error','Something went wrong','Please check your connection and try again.');setLoading('enrollBtn',false);}
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1933,11 +1859,10 @@ async function switchAdminSection(section, el){
   document.querySelectorAll('.admin-nav-item').forEach(i=>i.classList.remove('active'));
   document.getElementById('admin-'+section).classList.add('active');
   el.classList.add('active');
-  const titles={dashboard:'Dashboard',upload:'Upload Files',files:'Manage Files',users:'Users',enrollments:'Enrollments',packages:'Packages'};
+  const titles={dashboard:'Dashboard',upload:'Upload Files',files:'Manage Files',users:'Users',packages:'Packages'};
   document.getElementById('adminSectionTitle').textContent=titles[section]||section;
   if(section==='files') await renderAdminFiles();
   if(section==='users') await renderAdminUsers();
-  if(section==='enrollments') await renderAdminEnrollments();
   if(section==='dashboard') await updateAdminStats();
 }
 
@@ -2203,41 +2128,6 @@ async function renderAdminUsers(){
 
 // Note: addDemoUser removed - users are now managed through backend API
 
-/* ── ADMIN ENROLLMENTS ── */
-async function renderAdminEnrollments(){
-  const tbody=document.getElementById('adminEnrollmentsBody');
-  if(!tbody) return;
-  try {
-    const res=await fetch(`${API_BASE}/admin/enrollments`,{headers:authHeaders()});
-    if(!res.ok) throw new Error('Failed to fetch enrollments');
-    const data=await res.json();
-    const list=data.enrollments||[];
-    if(list.length===0){tbody.innerHTML='<tr><td colspan="6" class="table-empty">No enrollments yet.</td></tr>';return;}
-    const pageSize=50;
-    const offset=((data.page||1)-1)*pageSize;
-    tbody.innerHTML=list.map((e,i)=>{
-      const u=e.userId||{};
-      const name=u.name||'—';
-      const email=u.email||'—';
-      const phone=u.phone||'—';
-      const pkg=e.packageName||'Package '+e.packageId;
-      const amt=e.amount!=null?'₹'+(Number(e.amount)/100).toLocaleString('en-IN'):'—';
-      const d=e.createdAt?new Date(e.createdAt).toLocaleString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
-      return `<tr>
-        <td style="color:var(--text2);">${offset+(i+1)}</td>
-        <td><div style="font-weight:600;">${name}</div><div style="font-size:.8rem;color:var(--text2);">${phone||''}</div></td>
-        <td style="font-size:.85rem;color:var(--text2);">${email}</td>
-        <td style="font-weight:600;color:var(--orange);">${pkg}</td>
-        <td>${amt}</td>
-        <td style="font-size:.82rem;color:var(--text2);">${d}</td>
-      </tr>`;
-    }).join('');
-  } catch (err) {
-    console.error('Failed to load enrollments:',err);
-    tbody.innerHTML='<tr><td colspan="6" class="table-empty">❌ Failed to load enrollments. Please try again.</td></tr>';
-  }
-}
-
 /* ── ADMIN PACKAGES ── */
 function renderAdminPackages(){
   const tbody=document.getElementById('adminPackagesBody');
@@ -2270,7 +2160,7 @@ function showToast(type,title,message,duration=4500){
 /* KEYBOARD */
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape') return;
-  ['enrollModal','loginModal','dashboardModal','adminLoginModal','qrModal'].forEach(closeModal);
+  ['enrollModal','loginModal','dashboardModal','adminLoginModal'].forEach(closeModal);
   closeDrawer();
   if(isAdminMode && e.key==='Escape') exitAdmin();
 });
