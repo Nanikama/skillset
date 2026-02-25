@@ -461,9 +461,10 @@
   };
 
   /* ═══════════════════════════════
-     FIX #1: Always use production backend — no conditional logic
+     FIX #1: Always use production backend with /api prefix
+     Backend routes are at /api/auth/register, /api/auth/login, etc.
   ═══════════════════════════════ */
-  const API_BASE = 'https://skillset-g4oh.onrender.com';
+  const API_BASE = 'https://skillset-g4oh.onrender.com/api';
 
   let authToken   = localStorage.getItem('sb_token') || null;
   let currentUser = JSON.parse(localStorage.getItem('sb_user') || 'null');
@@ -500,14 +501,13 @@
     try {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
-      // Try the health endpoint; fall back to root if not available
-      const res = await fetch(`${API_BASE}/health`, {
+      // Hit the root URL — it returns "API is running" with 200
+      const res = await fetch(`https://skillset-g4oh.onrender.com/`, {
         signal: controller.signal,
         method: 'GET',
-        headers: { 'Accept': 'application/json' }
       });
       clearTimeout(timer);
-      return res.ok || res.status < 500; // 404 still means server is alive
+      return res.ok || res.status < 500;
     } catch {
       return false;
     }
@@ -1379,7 +1379,7 @@ async function downloadResource(id) {
     }
     const data = await res.json();
     if (data.fileUrl) {
-      const url = data.fileUrl.startsWith('http') ? data.fileUrl : `${API_BASE.replace('/api', '')}${data.fileUrl}`;
+      const url = data.fileUrl.startsWith('http') ? data.fileUrl : `https://skillset-g4oh.onrender.com${data.fileUrl}`;
       window.open(url, '_blank');
       showToast('success','Download Started', data.fileName || 'Resource');
     } else {
@@ -2051,7 +2051,7 @@ function previewFile(id, directUrl){
   if (directUrl && directUrl.startsWith('http')) { window.open(directUrl, '_blank'); return; }
   fetch(`${API_BASE}/admin/resources`, { headers: authHeaders() })
     .then(r=>r.json())
-    .then(data=>{ const f = data.resources?.find(r=>r._id===id); if(f?.fileUrl){ const url=f.fileUrl.startsWith('http')?f.fileUrl:`${API_BASE}${f.fileUrl}`; window.open(url,'_blank'); } else showToast('info','No Preview','No URL available for this file.'); })
+    .then(data=>{ const f = data.resources?.find(r=>r._id===id); if(f?.fileUrl){ const url=f.fileUrl.startsWith('http')?f.fileUrl:`https://skillset-g4oh.onrender.com${f.fileUrl}`; window.open(url,'_blank'); } else showToast('info','No Preview','No URL available for this file.'); })
     .catch(()=>showToast('error','Preview Failed','Could not preview file.'));
 }
 
