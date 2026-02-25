@@ -1045,9 +1045,10 @@
 
       <div class="admin-content">
         <!-- DASHBOARD -->
-    <div class="admin-section active" id="admin-dashboard">
+   <!-- DASHBOARD -->
+<div class="admin-section active" id="admin-dashboard">
 
-  <!-- TOP 4 CARDS -->
+  <!-- TOP STATS -->
   <div class="admin-stats-grid">
     <div class="admin-stat-card orange">
       <div class="admin-stat-icon">👥</div>
@@ -1069,6 +1070,26 @@
       <div class="admin-stat-value" id="stat-payout">₹0</div>
       <div class="admin-stat-label">Payout Request</div>
     </div>
+    <div class="admin-stat-card orange">
+      <div class="admin-stat-icon">📁</div>
+      <div class="admin-stat-value" id="stat-files">0</div>
+      <div class="admin-stat-label">Total Files Uploaded</div>
+    </div>
+    <div class="admin-stat-card sky">
+      <div class="admin-stat-icon">📥</div>
+      <div class="admin-stat-value" id="stat-downloads">—</div>
+      <div class="admin-stat-label">Total Downloads</div>
+    </div>
+    <div class="admin-stat-card green">
+      <div class="admin-stat-icon">👥</div>
+      <div class="admin-stat-value" id="stat-users">5,465</div>
+      <div class="admin-stat-label">Enrolled Students</div>
+    </div>
+    <div class="admin-stat-card purple">
+      <div class="admin-stat-icon">📦</div>
+      <div class="admin-stat-value">6</div>
+      <div class="admin-stat-label">Active Packages</div>
+    </div>
   </div>
 
   <!-- DETAIL ANALYTICS -->
@@ -1076,11 +1097,11 @@
     <h3>📊 Detail Analytics</h3>
     <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center;">
       <input type="date" class="form-input" id="analyticsFrom" style="width:180px;"/>
-      <input type="date" class="form-input" id="analyticsTo" style="width:180px;"/>
+      <input type="date" class="form-input" id="analyticsTo"   style="width:180px;"/>
       <button class="btn btn-primary" onclick="loadAnalytics()">Search</button>
-      <button class="btn btn-ghost" onclick="clearAnalytics()">Clear</button>
+      <button class="btn btn-ghost"   onclick="clearAnalytics()">Clear</button>
     </div>
-    <div class="admin-stats-grid" id="analyticsGrid">
+    <div class="admin-stats-grid">
       <div class="admin-stat-card orange">
         <div class="admin-stat-value" id="an-inclGst">₹3,40,466</div>
         <div class="admin-stat-label">Including GST Sale</div>
@@ -1131,33 +1152,45 @@
   <!-- PACKAGE BREAKDOWN -->
   <div class="admin-card">
     <h3>📦 Package Breakdown</h3>
-    <div class="admin-stats-grid" id="packageBreakdownGrid">
+    <div class="admin-stats-grid">
       <div class="admin-stat-card orange">
         <div class="admin-stat-value" id="pkg-starter">₹2,047</div>
-        <div class="admin-stat-label">Starter Package [5]</div>
+        <div class="admin-stat-label" id="pkg-starter-lbl">Starter Package [5]</div>
       </div>
       <div class="admin-stat-card green">
         <div class="admin-stat-value" id="pkg-basic">₹5,996</div>
-        <div class="admin-stat-label">Basic Package [4]</div>
+        <div class="admin-stat-label" id="pkg-basic-lbl">Basic Package [4]</div>
       </div>
       <div class="admin-stat-card sky">
         <div class="admin-stat-value" id="pkg-silver">₹19,343</div>
-        <div class="admin-stat-label">Silver Package [7]</div>
+        <div class="admin-stat-label" id="pkg-silver-lbl">Silver Package [7]</div>
       </div>
       <div class="admin-stat-card purple">
         <div class="admin-stat-value" id="pkg-gold">₹10,998</div>
-        <div class="admin-stat-label">Gold Package [2]</div>
+        <div class="admin-stat-label" id="pkg-gold-lbl">Gold Package [2]</div>
       </div>
       <div class="admin-stat-card orange">
         <div class="admin-stat-value" id="pkg-diamond">₹19,997</div>
-        <div class="admin-stat-label">Diamond Package [3]</div>
+        <div class="admin-stat-label" id="pkg-diamond-lbl">Diamond Package [3]</div>
       </div>
       <div class="admin-stat-card green">
         <div class="admin-stat-value" id="pkg-premium">₹1,82,982</div>
-        <div class="admin-stat-label">Premium Package [18]</div>
+        <div class="admin-stat-label" id="pkg-premium-lbl">Premium Package [18]</div>
       </div>
     </div>
   </div>
+
+  <!-- QUICK ACTIONS -->
+  <div class="admin-card">
+    <h3>⚡ Quick Actions</h3>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="switchAdminSection('upload', document.querySelectorAll('.admin-nav-item')[1])">📤 Upload New File</button>
+      <button class="btn btn-ghost"   onclick="switchAdminSection('files',  document.querySelectorAll('.admin-nav-item')[2])">📁 View All Files</button>
+      <button class="btn btn-ghost"   onclick="switchAdminSection('users',  document.querySelectorAll('.admin-nav-item')[3])">👥 Manage Users</button>
+    </div>
+  </div>
+
+</div>
 
   <!-- QUICK ACTIONS -->
   <div class="admin-card">
@@ -1596,7 +1629,9 @@ function scrollToTop() { window.scrollTo({top:0,behavior:'smooth'}); }
 function scrollToSection(id) { const el=document.getElementById(id); if(el) window.scrollTo({top:el.offsetTop-80,behavior:'smooth'}); }
 document.querySelectorAll('a[href^="#"]').forEach(a=>{
   a.addEventListener('click',e=>{
-    const t=document.querySelector(a.getAttribute('href'));
+    const href = a.getAttribute('href');
+    if (!href || href === '#') return;
+    const t=document.querySelector(href);
     if(!t) return;
     e.preventDefault();
     window.scrollTo({top:t.offsetTop-80,behavior:'smooth'});
@@ -2055,21 +2090,40 @@ function startAdminClock(){
   tick(); setInterval(tick,1000);
 }
 
+function safeSet(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
 async function updateAdminStats(){
+  // Always set fallback values first so dashboard is never blank
+  safeSet('stat-files',      resourceStore.length);
+  safeSet('stat-downloads',  '—');
+  safeSet('stat-users',      '5,465');
+  safeSet('stat-totalUsers', '36');
+  safeSet('stat-commissions','₹18,798');
+  safeSet('stat-wallet',     '₹1,18,178');
+  safeSet('stat-payout',     '₹0');
+
+  // Only try backend if we have a real token (not local admin)
+  if (!authToken || authToken.startsWith('admin-local')) return;
+
   try {
     const res  = await fetch(`${API_BASE}/admin/stats`, { headers: authHeaders() });
     if (!res.ok) throw new Error('Failed');
     const data = await res.json();
-    document.getElementById('stat-files').textContent     = data.totalFiles ?? '—';
-    document.getElementById('stat-downloads').textContent = data.totalDownloads ?? '—';
-    document.getElementById('stat-users').textContent     = (data.enrolledCount ?? data.totalUsers ?? 0).toLocaleString('en-IN');
+    const fmt  = n => '₹' + (n||0).toLocaleString('en-IN');
+    safeSet('stat-files',      data.totalFiles       ?? resourceStore.length);
+    safeSet('stat-downloads',  data.totalDownloads   ?? '—');
+    safeSet('stat-users',      (data.enrolledCount   ?? data.totalUsers ?? 0).toLocaleString('en-IN'));
+    safeSet('stat-totalUsers', data.totalUsers       ?? '36');
+    safeSet('stat-commissions',fmt(data.commissionsPaid));
+    safeSet('stat-wallet',     fmt(data.walletBalance));
+    safeSet('stat-payout',     fmt(data.payoutRequest));
   } catch {
-    document.getElementById('stat-files').textContent     = resourceStore.length;
-    document.getElementById('stat-downloads').textContent = '—';
-    document.getElementById('stat-users').textContent     = '5,465';
+    // fallback values already set above
   }
 }
-
 /* FILE UPLOAD */
 let selectedFileData = null;
 function handleDragOver(e){e.preventDefault();document.getElementById('uploadArea').classList.add('drag-over');}
