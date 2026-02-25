@@ -1045,38 +1045,131 @@
 
       <div class="admin-content">
         <!-- DASHBOARD -->
-        <div class="admin-section active" id="admin-dashboard">
-          <div class="admin-stats-grid">
-            <div class="admin-stat-card orange">
-              <div class="admin-stat-icon">📁</div>
-              <div class="admin-stat-value" id="stat-files">0</div>
-              <div class="admin-stat-label">Total Files Uploaded</div>
-            </div>
-            <div class="admin-stat-card green">
-              <div class="admin-stat-icon">👥</div>
-              <div class="admin-stat-value" id="stat-users">5,465</div>
-              <div class="admin-stat-label">Enrolled Students</div>
-            </div>
-            <div class="admin-stat-card sky">
-              <div class="admin-stat-icon">📦</div>
-              <div class="admin-stat-value">6</div>
-              <div class="admin-stat-label">Active Packages</div>
-            </div>
-            <div class="admin-stat-card purple">
-              <div class="admin-stat-icon">📥</div>
-              <div class="admin-stat-value" id="stat-downloads">0</div>
-              <div class="admin-stat-label">Total Downloads</div>
-            </div>
-          </div>
-          <div class="admin-card">
-            <h3>⚡ Quick Actions</h3>
-            <div style="display:flex;gap:12px;flex-wrap:wrap;">
-              <button class="btn btn-primary" onclick="switchAdminSection('upload', document.querySelector('.admin-nav-item:nth-child(2)'))">📤 Upload New File</button>
-              <button class="btn btn-ghost" onclick="switchAdminSection('files', document.querySelector('.admin-nav-item:nth-child(3)'))">📁 View All Files</button>
-              <button class="btn btn-ghost" onclick="switchAdminSection('users', document.querySelector('.admin-nav-item:nth-child(4)'))">👥 Manage Users</button>
-            </div>
-          </div>
-        </div>
+    <div class="admin-section active" id="admin-dashboard">
+
+  <!-- TOP 4 CARDS -->
+  <div class="admin-stats-grid">
+    <div class="admin-stat-card orange">
+      <div class="admin-stat-icon">👥</div>
+      <div class="admin-stat-value" id="stat-totalUsers">36</div>
+      <div class="admin-stat-label">Total Users</div>
+    </div>
+    <div class="admin-stat-card green">
+      <div class="admin-stat-icon">💸</div>
+      <div class="admin-stat-value" id="stat-commissions">₹18,798</div>
+      <div class="admin-stat-label">Commissions Paid</div>
+    </div>
+    <div class="admin-stat-card sky">
+      <div class="admin-stat-icon">👛</div>
+      <div class="admin-stat-value" id="stat-wallet">₹1,18,178</div>
+      <div class="admin-stat-label">Wallet Balance</div>
+    </div>
+    <div class="admin-stat-card purple">
+      <div class="admin-stat-icon">📤</div>
+      <div class="admin-stat-value" id="stat-payout">₹0</div>
+      <div class="admin-stat-label">Payout Request</div>
+    </div>
+  </div>
+
+  <!-- DETAIL ANALYTICS -->
+  <div class="admin-card">
+    <h3>📊 Detail Analytics</h3>
+    <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center;">
+      <input type="date" class="form-input" id="analyticsFrom" style="width:180px;"/>
+      <input type="date" class="form-input" id="analyticsTo" style="width:180px;"/>
+      <button class="btn btn-primary" onclick="loadAnalytics()">Search</button>
+      <button class="btn btn-ghost" onclick="clearAnalytics()">Clear</button>
+    </div>
+    <div class="admin-stats-grid" id="analyticsGrid">
+      <div class="admin-stat-card orange">
+        <div class="admin-stat-value" id="an-inclGst">₹3,40,466</div>
+        <div class="admin-stat-label">Including GST Sale</div>
+      </div>
+      <div class="admin-stat-card green">
+        <div class="admin-stat-value" id="an-exclGst">₹2,88,531</div>
+        <div class="admin-stat-label">Without GST Sale</div>
+      </div>
+      <div class="admin-stat-card sky">
+        <div class="admin-stat-value" id="an-gst">₹51,935</div>
+        <div class="admin-stat-label">GST Amount</div>
+      </div>
+      <div class="admin-stat-card purple">
+        <div class="admin-stat-value" id="an-commission">₹1,38,976</div>
+        <div class="admin-stat-label">Total Commission</div>
+      </div>
+      <div class="admin-stat-card orange">
+        <div class="admin-stat-value" id="an-reward">₹0</div>
+        <div class="admin-stat-label">Total Reward</div>
+      </div>
+      <div class="admin-stat-card green">
+        <div class="admin-stat-value" id="an-profit">₹1,49,555</div>
+        <div class="admin-stat-label">Total Profit</div>
+      </div>
+      <div class="admin-stat-card sky">
+        <div class="admin-stat-value" id="an-razorpay">₹0</div>
+        <div class="admin-stat-label">Razorpay Sales</div>
+      </div>
+      <div class="admin-stat-card purple">
+        <div class="admin-stat-value" id="an-phonepe">₹0</div>
+        <div class="admin-stat-label">PhonePe Sales</div>
+      </div>
+      <div class="admin-stat-card orange">
+        <div class="admin-stat-value" id="an-wallet">₹0</div>
+        <div class="admin-stat-label">Wallet Sales</div>
+      </div>
+      <div class="admin-stat-card green">
+        <div class="admin-stat-value" id="an-upi">₹2,35,364</div>
+        <div class="admin-stat-label">UPI Sales</div>
+      </div>
+      <div class="admin-stat-card sky">
+        <div class="admin-stat-value" id="an-cosmofeed">₹0</div>
+        <div class="admin-stat-label">Cosmofeed Sales</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PACKAGE BREAKDOWN -->
+  <div class="admin-card">
+    <h3>📦 Package Breakdown</h3>
+    <div class="admin-stats-grid" id="packageBreakdownGrid">
+      <div class="admin-stat-card orange">
+        <div class="admin-stat-value" id="pkg-starter">₹2,047</div>
+        <div class="admin-stat-label">Starter Package [5]</div>
+      </div>
+      <div class="admin-stat-card green">
+        <div class="admin-stat-value" id="pkg-basic">₹5,996</div>
+        <div class="admin-stat-label">Basic Package [4]</div>
+      </div>
+      <div class="admin-stat-card sky">
+        <div class="admin-stat-value" id="pkg-silver">₹19,343</div>
+        <div class="admin-stat-label">Silver Package [7]</div>
+      </div>
+      <div class="admin-stat-card purple">
+        <div class="admin-stat-value" id="pkg-gold">₹10,998</div>
+        <div class="admin-stat-label">Gold Package [2]</div>
+      </div>
+      <div class="admin-stat-card orange">
+        <div class="admin-stat-value" id="pkg-diamond">₹19,997</div>
+        <div class="admin-stat-label">Diamond Package [3]</div>
+      </div>
+      <div class="admin-stat-card green">
+        <div class="admin-stat-value" id="pkg-premium">₹1,82,982</div>
+        <div class="admin-stat-label">Premium Package [18]</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUICK ACTIONS -->
+  <div class="admin-card">
+    <h3>⚡ Quick Actions</h3>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="switchAdminSection('upload', document.querySelectorAll('.admin-nav-item')[1])">📤 Upload New File</button>
+      <button class="btn btn-ghost" onclick="switchAdminSection('files', document.querySelectorAll('.admin-nav-item')[2])">📁 View All Files</button>
+      <button class="btn btn-ghost" onclick="switchAdminSection('users', document.querySelectorAll('.admin-nav-item')[3])">👥 Manage Users</button>
+    </div>
+  </div>
+
+</div>
 
         <!-- UPLOAD -->
         <div class="admin-section" id="admin-upload">
@@ -1889,6 +1982,44 @@ async function handleAdminLogin(){
 /* ═══════════════════════════════════════════════════════════
    ADMIN PANEL
 ═══════════════════════════════════════════════════════════ */
+  async function loadAnalytics() {
+  const from = document.getElementById('analyticsFrom').value;
+  const to   = document.getElementById('analyticsTo').value;
+  if (!from || !to) { showToast('info', 'Select Dates', 'Please select both from and to dates.'); return; }
+  try {
+    const res  = await fetch(`${API_BASE}/admin/analytics?from=${from}&to=${to}`, { headers: authHeaders() });
+    if (!res.ok) throw new Error('Failed');
+    const d = await res.json();
+    const fmt = n => '₹' + (n||0).toLocaleString('en-IN');
+    document.getElementById('an-inclGst').textContent    = fmt(d.includingGst);
+    document.getElementById('an-exclGst').textContent    = fmt(d.withoutGst);
+    document.getElementById('an-gst').textContent        = fmt(d.gstAmount);
+    document.getElementById('an-commission').textContent = fmt(d.totalCommission);
+    document.getElementById('an-reward').textContent     = fmt(d.totalReward);
+    document.getElementById('an-profit').textContent     = fmt(d.totalProfit);
+    document.getElementById('an-razorpay').textContent   = fmt(d.razorpaySales);
+    document.getElementById('an-phonepe').textContent    = fmt(d.phonepeSales);
+    document.getElementById('an-wallet').textContent     = fmt(d.walletSales);
+    document.getElementById('an-upi').textContent        = fmt(d.upiSales);
+    document.getElementById('an-cosmofeed').textContent  = fmt(d.cosmofeedSales);
+    // Package breakdown
+    if (d.packageSales) {
+      d.packageSales.forEach(p => {
+        const key = p.name?.toLowerCase().replace(' package','').replace(' ','');
+        const el  = document.getElementById('pkg-'+key);
+        if (el) { el.textContent = fmt(p.revenue); el.parentElement.querySelector('.admin-stat-label').textContent = p.name+' ['+p.count+']'; }
+      });
+    }
+    showToast('success', 'Analytics Loaded', `Data for ${from} to ${to}`);
+  } catch {
+    showToast('error', 'Failed', 'Could not load analytics. Backend endpoint /api/admin/analytics may not exist yet.');
+  }
+}
+
+function clearAnalytics() {
+  document.getElementById('analyticsFrom').value = '';
+  document.getElementById('analyticsTo').value   = '';
+}
 async function openAdminPanel(){
   isAdminMode = true;
   document.getElementById('adminPanel').classList.add('open');
