@@ -2194,8 +2194,61 @@ async function renderAdminFiles(){
   const search = document.getElementById('filesSearch')?.value.toLowerCase()||'';
   const cat    = document.getElementById('filesFilterCat')?.value||'';
 
+  // Skip backend call for local admin token
+  if (!authToken || authToken.startsWith('admin-local')) {
+    let files = resourceStore;
+    if (search) files = files.filter(f=>(f.title||'').toLowerCase().includes(search));
+    if (cat)    files = files.filter(f=>f.category===cat);
+    if (files.length===0){ tbody.innerHTML='<tr><td colspan="7" class="table-empty">No files uploaded yet.</td></tr>'; return; }
+    tbody.innerHTML = files.map((f,i)=>{
+      const info = getFileTypeInfo(f.url||f.fileUrl||'', f.title||'');
+      return `<tr>
+        <td style="color:var(--text2);">${i+1}</td>
+        <td><div style="font-weight:600;font-size:.85rem;">${f.title}</div></td>
+        <td><span style="color:var(--text2);font-size:.83rem;">${f.category||'General'}</span></td>
+        <td><span class="file-type-badge ${info.cls}">${info.label}</span></td>
+        <td><span class="status-badge ${f.visibility==='public'?'active':'pending'}">${f.visibility==='public'?'🌍 Public':'🔒 Enrolled'}</span></td>
+        <td style="color:var(--text2);font-size:.8rem;">${new Date().toLocaleDateString('en-IN')}</td>
+        <td><button class="table-action-btn danger" onclick="deleteLocalFile('${f.id||f._id}')">🗑 Delete</button></td>
+      </tr>`;
+    }).join('');
+    return;
+  }
+
   try {
     const res  = await fetch(`${API_BASE}/admin/resources`, {
+      headers: authHeaders(),
+      signal: AbortSignal.timeout(12000)
+    });
+    if (!res.ok) throw new Error('Failed');
+    const data = await res.json();
+    let files = data.resources || [];
+    if (search) files = files.filter(f=>f.title.toLowerCase().includes(search)||(f.category||'').toLowerCase().includes(search));
+    if (cat)    files = files.filter(f=>f.category===cat);
+    if (files.length===0){ tbody.innerHTML='<tr><td colspan="7" class="table-empty">No files found.</td></tr>'; return; }
+    tbody.innerHTML = files.map((f,i)=>{
+      const info     = getFileTypeInfo(f.fileUrl||f.url||'', f.fileName||'');
+      const visCls   = f.visibility==='public'?'active':'pending';
+      const visLbl   = f.visibility==='public'?'🌍 Public':'🔒 Enrolled';
+      const uploadDate = f.createdAt ? new Date(f.createdAt) : new Date();
+      return `<tr>
+        <td style="color:var(--text2);">${i+1}</td>
+        <td><div style="font-weight:600;font-size:.85rem;">${f.title}</div><div style="font-size:.73rem;color:var(--text2);">${f.fileName||''}</div></td>
+        <td><span style="color:var(--text2);font-size:.83rem;">${f.category}</span></td>
+        <td><span class="file-type-badge ${info.cls}">${info.label}</span></td>
+        <td><span class="status-badge ${visCls}">${visLbl}</span></td>
+        <td style="color:var(--text2);font-size:.8rem;">${uploadDate.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</td>
+        <td>
+          <button class="table-action-btn" onclick="previewFile('${f._id}','${f.fileUrl||''}')">👁 View</button>
+          <button class="table-action-btn danger" onclick="deleteFile('${f._id}')">🗑 Delete</button>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch(err) {
+    console.error('Failed to load admin files:', err);
+    tbody.innerHTML='<tr><td colspan="7" class="table-empty">No files uploaded yet.</td></tr>';
+  }
+}, {
       headers: authHeaders(),
       signal: AbortSignal.timeout(12000)
     });
@@ -2250,7 +2303,13 @@ async function deleteFile(id){
     showToast('error','Delete Failed','Could not delete file. Please try again.');
   }
 }
-
+function deleteLocalFile(id) {
+  if (!confirm('Delete this file?')) return;
+  resourceStore = resourceStore.filter(f => (f.id||f._id) !== id);
+  saveResources();
+  renderAdminFiles();
+  showToast('success','Deleted','File removed.');
+}
 async function renderAdminUsers(){
   const tbody  = document.getElementById('adminUsersBody');
   const search = document.getElementById('usersSearch')?.value.toLowerCase()||'';
