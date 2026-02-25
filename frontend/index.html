@@ -452,13 +452,13 @@
     name:     'Skillbrzee Admin',
   };
 
-  const PRODUCTION_API_BASE = 'http://localhost:5002/api';
+  const PRODUCTION_API_BASE = 'https://skillset-g4oh.onrender.com';
   const API_BASE = (() => {
     const forced = localStorage.getItem('sb_api_base');
     if (forced) return forced.replace(/\/$/, '');
     if (location?.port === '5000' || location?.port === '5002') return `${location.origin}/api`;
     const isLocal = /^localhost$|^127\.0\.0\.1$/i.test(location?.hostname || '');
-    if (isLocal) return 'http://localhost:5002/api';
+    if (isLocal) return 'https://skillset-g4oh.onrender.com';
     return PRODUCTION_API_BASE;
   })();
 
