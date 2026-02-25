@@ -464,6 +464,14 @@
      FIX #1: Always use production backend with /api prefix
      Backend routes are at /api/auth/register, /api/auth/login, etc.
   ═══════════════════════════════ */
+  /* ─────────────────────────────────────────────────────
+     API BASE — confirmed from server.js route mounts:
+       app.use('/api/auth',     ...)
+       app.use('/api/payments', ...)
+       app.use('/api/resources',...)
+       app.use('/api/admin',    ...)
+     Backend: https://skillset-g4oh.onrender.com
+  ───────────────────────────────────────────────────── */
   const API_BASE = 'https://skillset-g4oh.onrender.com/api';
 
   let authToken   = localStorage.getItem('sb_token') || null;
@@ -501,13 +509,13 @@
     try {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
-      // Hit the root URL — it returns "API is running" with 200
-      const res = await fetch(`https://skillset-g4oh.onrender.com/`, {
+      // Use /api/health — confirmed in server.js
+      const res = await fetch(`https://skillset-g4oh.onrender.com/api/health`, {
         signal: controller.signal,
         method: 'GET',
       });
       clearTimeout(timer);
-      return res.ok || res.status < 500;
+      return res.ok;
     } catch {
       return false;
     }
@@ -2155,22 +2163,21 @@ document.getElementById('adminLoginPass').addEventListener('keydown', e => { if(
 document.addEventListener('DOMContentLoaded', async () => {
   // Restore auth from localStorage immediately (no server needed)
   updateNavAuth();
-
-  // Kick off background tasks in parallel — don't block page render
-  Promise.allSettled([
-    refreshUser(),
-    renderCourses(),
-    renderPublicResources(),
-  ]).then(() => {
-    updateNavAuth(); // refresh nav after user data loads
-  });
-
   renderPackages();
   renderTestimonials();
   buildDots();
   startSlider();
   observeReveal();
   initCursorTargets();
+
+  // Kick off server calls in background — don't block page render
+  Promise.allSettled([
+    refreshUser(),
+    renderCourses(),
+    renderPublicResources(),
+  ]).then(() => {
+    updateNavAuth();
+  });
 });
 </script>
 </body>
