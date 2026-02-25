@@ -2049,6 +2049,7 @@ async function openAdminPanel(){
   isAdminMode = true;
   document.getElementById('adminPanel').classList.add('open');
   document.body.style.overflow = 'hidden';
+  setTimeout(() => { document.querySelector('.admin-main').scrollTop = 0; }, 50);
   await updateAdminStats();
   await renderAdminFiles();
   await renderAdminUsers();
