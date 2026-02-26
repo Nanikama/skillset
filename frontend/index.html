@@ -1539,32 +1539,43 @@ function openAdminLogin(e){e&&e.preventDefault();openModal('adminLoginModal');}
 document.getElementById('adminLoginModal').addEventListener('click',e=>{if(e.target===document.getElementById('adminLoginModal'))closeModal('adminLoginModal');});
 
 async function handleAdminLogin() {
-  const email=document.getElementById('adminLoginEmail').value.trim();
-  const pass=document.getElementById('adminLoginPass').value;
-  if(!email||!pass){showToast('error','Missing Fields','Please enter email and password.');return;}
-  setLoading('adminLoginBtn',true,'Verifying…');
+  const email = document.getElementById('adminLoginEmail').value.trim();
+  const pass  = document.getElementById('adminLoginPass').value;
+  if (!email || !pass) { showToast('error','Missing Fields','Please enter email and password.'); return; }
+  setLoading('adminLoginBtn', true, 'Verifying…');
   try {
-    if(email===ADMIN_CREDENTIALS.username&&pass===ADMIN_CREDENTIALS.password){
-      saveAuth('admin-local-token-'+Date.now(),{name:ADMIN_CREDENTIALS.name,email:ADMIN_CREDENTIALS.username,role:'admin',enrolledPackages:[]});
-      closeModal('adminLoginModal');
-      document.getElementById('adminLoginEmail').value='';document.getElementById('adminLoginPass').value='';
-      setLoading('adminLoginBtn',false);
-      await openAdminPanel();
+    // ✅ ALWAYS hit real API — no fake local token
+    const res  = await fetch(`${API_BASE}/auth/login`, {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({ email, password: pass })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      showToast('error', 'Access Denied', data.error || 'Invalid credentials.');
+      document.getElementById('adminLoginPass').value = '';
+      setLoading('adminLoginBtn', false);
       return;
     }
-    const res=await fetch(`${API_BASE}/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})});
-    if(!res.ok) throw new Error('Invalid credentials');
-    const data=await res.json();
-    if(data.user?.role==='admin'){
-      saveAuth(data.accessToken,data.user);
-      closeModal('adminLoginModal');
-      document.getElementById('adminLoginEmail').value='';document.getElementById('adminLoginPass').value='';
-      setLoading('adminLoginBtn',false);
-      await openAdminPanel();
-    } else {showToast('error','Access Denied','Admin access required.');document.getElementById('adminLoginPass').value='';setLoading('adminLoginBtn',false);}
-  } catch(err){showToast('error','Access Denied','Invalid admin credentials.');document.getElementById('adminLoginPass').value='';setLoading('adminLoginBtn',false);}
+    if (data.user?.role !== 'admin') {
+      showToast('error', 'Access Denied', 'Admin privileges required.');
+      document.getElementById('adminLoginPass').value = '';
+      setLoading('adminLoginBtn', false);
+      return;
+    }
+    // ✅ Real JWT token — all API calls will work
+    saveAuth(data.accessToken, data.user);
+    closeModal('adminLoginModal');
+    document.getElementById('adminLoginEmail').value = '';
+    document.getElementById('adminLoginPass').value  = '';
+    setLoading('adminLoginBtn', false);
+    await openAdminPanel();
+  } catch (err) {
+    showToast('error', 'Connection Error', 'Could not reach server.');
+    document.getElementById('adminLoginPass').value = '';
+    setLoading('adminLoginBtn', false);
+  }
 }
-
 /* ════════════════════════════════════════════════════
    ADMIN PANEL — CORE
 ════════════════════════════════════════════════════ */
