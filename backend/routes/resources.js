@@ -4,7 +4,7 @@ const multer   = require('multer');
 const path     = require('path');
 const crypto   = require('crypto');
 const Resource = require('../models/Resource');
-const { protect, adminOnly, optionalAuth } = require('../middleware/auth');
+const { protect, adminOnly } = require('../middleware/auth');
 
 /* ── Multer storage config ── */
 const storage = multer.diskStorage({
@@ -27,24 +27,17 @@ const upload = multer({
 
 function getFileType(filename) {
   const ext = path.extname(filename).toLowerCase().replace('.', '');
-  if (ext === 'pdf')                    return 'pdf';
+  if (ext === 'pdf') return 'pdf';
   if (['doc','docx','ppt','pptx','xls','xlsx'].includes(ext)) return 'doc';
   if (['jpg','jpeg','png','gif','webp'].includes(ext)) return 'img';
   return 'other';
 }
 
-/* ── GET /api/resources — public list ── */
-// BEFORE (line ~37)
-router.get('/', protect, async (req, res)
-
-// AFTER
+/* ── GET /api/resources — login required ── */
 router.get('/', protect, async (req, res) => {
   try {
     const { category } = req.query;
     const filter = { isActive: true };
-    if (!req.user) {
-      filter.visibility = 'public';
-    }
     if (category) filter.category = category;
     const resources = await Resource.find(filter).sort({ createdAt: -1 });
     res.json({ resources });
@@ -111,15 +104,11 @@ router.post('/add-url', protect, adminOnly, async (req, res) => {
   }
 });
 
-/* ── POST /api/resources/:id/download ── */
+/* ── POST /api/resources/:id/download — login required ── */
 router.post('/:id/download', protect, async (req, res) => {
   try {
     const resource = await Resource.findById(req.params.id);
     if (!resource || !resource.isActive) return res.status(404).json({ error: 'Resource not found.' });
-
-    if (resource.visibility === 'enrolled' && !req.user) {
-      return res.status(401).json({ error: 'Login required to download this resource.' });
-    }
 
     await Resource.findByIdAndUpdate(req.params.id, { $inc: { downloads: 1 } });
     res.json({ fileUrl: resource.fileUrl, fileName: resource.fileName });
