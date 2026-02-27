@@ -34,7 +34,11 @@ function getFileType(filename) {
 }
 
 /* ── GET /api/resources — public list ── */
-router.get('/', optionalAuth, async (req, res) => {
+// BEFORE (line ~37)
+router.get('/', protect, async (req, res)
+
+// AFTER
+router.get('/', protect, async (req, res) => {
   try {
     const { category } = req.query;
     const filter = { isActive: true };
@@ -69,7 +73,7 @@ router.post('/upload', protect, adminOnly, upload.single('file'), async (req, re
       title,
       description: description || '',
       category   : category    || 'General',
-      visibility : visibility  || 'public',
+      visibility : visibility  || 'enrolled',
       fileUrl,
       fileName,
       fileSize : req.file?.size || 0,
@@ -94,7 +98,7 @@ router.post('/add-url', protect, adminOnly, async (req, res) => {
       title,
       description: description || '',
       category   : category    || 'General',
-      visibility : visibility  || 'public',
+      visibility : visibility  || 'enrolled',
       fileUrl,
       fileName   : fileName || fileUrl.split('/').pop(),
       fileType   : getFileType(fileName || fileUrl),
@@ -108,7 +112,7 @@ router.post('/add-url', protect, adminOnly, async (req, res) => {
 });
 
 /* ── POST /api/resources/:id/download ── */
-router.post('/:id/download', optionalAuth, async (req, res) => {
+router.post('/:id/download', protect, async (req, res) => {
   try {
     const resource = await Resource.findById(req.params.id);
     if (!resource || !resource.isActive) return res.status(404).json({ error: 'Resource not found.' });
